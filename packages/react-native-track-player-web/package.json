@@ -3,7 +3,13 @@
   "version": "0.0.2",
   "description": "react-native-track-player web implementation",
   "author": "Rodrigo Siqueira <n3x.rodrigo@wine.com.br>",
-  "homepage": "",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/n3xrodrigo/react-native-track-player-web.git"
+  },
+  "bugs": {
+    "url": "https://github.com/n3xrodrigo/react-native-track-player-web/issues"
+  },
   "license": "ISC",
   "main": "./src/index.ts",
   "module": "./lib-esm/index.js",
