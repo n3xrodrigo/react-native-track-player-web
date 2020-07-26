@@ -14,16 +14,20 @@ let currentTrack = null;
 let _loadedTrack = null;
 
 // Setup metadata
-navigator.mediaSession.setActionHandler('play', play);
-navigator.mediaSession.setActionHandler('pause', pause);
-
-navigator.mediaSession.setActionHandler('previoustrack', skipToPrev);
-
-navigator.mediaSession.setActionHandler('nexttrack', skipToNext);
-
-navigator.mediaSession.setActionHandler('seekto', function (details) {
-  seekTo(details.seekTime);
-});
+if ('mediaSession' in navigator) {
+  // @ts-ignore
+  navigator.mediaSession.setActionHandler('play', play);
+  // @ts-ignore
+  navigator.mediaSession.setActionHandler('pause', pause);
+  // @ts-ignore
+  navigator.mediaSession.setActionHandler('previoustrack', skipToPrevious);
+  // @ts-ignore
+  navigator.mediaSession.setActionHandler('nexttrack', skipToNext);
+  // @ts-ignore
+  navigator.mediaSession.setActionHandler('seekto', function (details) {
+    seekTo(details.seekTime);
+  });
+}
 
 export async function setupPlayer() {
   if (audioPlayer) return audioPlayer;
@@ -35,50 +39,77 @@ export async function setupPlayer() {
   audioPlayer = el;
 
   audioPlayer.addEventListener('timeupdate', () => {
-    navigator.mediaSession.setPositionState({
-      duration: audioPlayer.duration || 0,
-      position: audioPlayer.currentTime,
-      playbackRate: audioPlayer.playbackRate,
-    });
+    if ('mediaSession' in navigator) {
+      // @ts-ignore
+      navigator.mediaSession.setPositionState({
+        duration: audioPlayer.duration || 0,
+        position: audioPlayer.currentTime,
+        playbackRate: audioPlayer.playbackRate,
+      });
+    }
   });
 
-  audioPlayer.addEventListener('play', (event) => {
-    navigator.mediaSession.playbackState = 'playing';
+  audioPlayer.addEventListener('play', () => {
+    if ('mediaSession' in navigator) {
+      // @ts-ignore
+      navigator.mediaSession.playbackState = 'playing';
+    }
+
     emitter.emit(TrackPlayerEvents.PLAYBACK_STATE, {
       state: Types.STATE_PLAYING,
     });
   });
 
   audioPlayer.addEventListener('waiting', () => {
-    navigator.mediaSession.playbackState = 'paused';
+    if ('mediaSession' in navigator) {
+      // @ts-ignore
+      navigator.mediaSession.playbackState = 'paused';
+    }
+
     emitter.emit(TrackPlayerEvents.PLAYBACK_STATE, {
       state: audioPlayer.paused ? Types.STATE_CONNECTING : Types.STATE_BUFFERING,
     });
   });
 
-  audioPlayer.addEventListener('playing', (event) => {
-    navigator.mediaSession.playbackState = 'playing';
+  audioPlayer.addEventListener('playing', () => {
+    if ('mediaSession' in navigator) {
+      // @ts-ignore
+      navigator.mediaSession.playbackState = 'playing';
+    }
+
     emitter.emit(TrackPlayerEvents.PLAYBACK_STATE, {
       state: Types.STATE_PLAYING,
     });
   });
 
   audioPlayer.addEventListener('pause', () => {
-    navigator.mediaSession.playbackState = 'paused';
+    if ('mediaSession' in navigator) {
+      // @ts-ignore
+      navigator.mediaSession.playbackState = 'paused';
+    }
+
     emitter.emit(TrackPlayerEvents.PLAYBACK_STATE, {
       state: Types.STATE_PAUSED,
     });
   });
 
   audioPlayer.addEventListener('canplay', () => {
-    navigator.mediaSession.playbackState = 'none';
+    if ('mediaSession' in navigator) {
+      // @ts-ignore
+      navigator.mediaSession.playbackState = 'none';
+    }
+
     emitter.emit(TrackPlayerEvents.PLAYBACK_STATE, {
       state: Types.STATE_READY,
     });
   });
 
   audioPlayer.addEventListener('ended', () => {
-    navigator.mediaSession.playbackState = 'none';
+    if ('mediaSession' in navigator) {
+      // @ts-ignore
+      navigator.mediaSession.playbackState = 'none';
+    }
+
     emitter.emit(TrackPlayerEvents.PLAYBACK_STATE, {
       state: Types.STATE_NONE,
     });
@@ -104,7 +135,7 @@ export function registerEventHandler() {
   // deprecated
 }
 
-export async function add(tracks, insertBeforeId) {
+export async function add(tracks, insertBeforeId = null) {
   if (Array.isArray(tracks)) {
     tracks = [...tracks];
   } else {
@@ -167,7 +198,7 @@ export async function skipToNext(forcePlay = false) {
   if (wasPlaying || forcePlay) play();
 }
 
-export async function skipToPrev() {
+export async function skipToPrevious() {
   index = index - 1;
 
   if (index < 0) {
@@ -205,7 +236,7 @@ export async function updateMetadataForTrack(id, metadata) {
   // todo
 }
 
-export async function updateOptions() {
+export async function updateOptions(options) {
   // todo
 }
 
@@ -224,7 +255,11 @@ export async function pause() {
 export async function stop() {
   audioPlayer.pause();
   audioPlayer.currentTime = 0;
-  navigator.mediaSession.setPositionState(null);
+
+  if ('mediaSession' in navigator) {
+    // @ts-ignore
+    navigator.mediaSession.setPositionState(null);
+  }
 }
 
 export async function seekTo(time) {
@@ -308,9 +343,12 @@ function loadTrack() {
   audioPlayer.appendChild(source);
   audioPlayer.load();
 
-  navigator.mediaSession.setPositionState({
-    duration: currentTrack.duration,
-  });
+  if ('mediaSession' in navigator) {
+    // @ts-ignore
+    navigator.mediaSession.setPositionState({
+      duration: currentTrack.duration,
+    });
+  }
 
   emitter.emit(TrackPlayerEvents.PLAYBACK_TRACK_CHANGED, {
     track: oldTrack ? oldTrack.id : null,

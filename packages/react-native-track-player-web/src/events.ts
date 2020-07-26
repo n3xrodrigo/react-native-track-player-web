@@ -1,7 +1,3 @@
-/**
- * @description
- *   Available event types that can be emitted from TrackPlayer.
- */
 export const TrackPlayerEvents = {
   REMOTE_PLAY: 'remote-play',
   REMOTE_PLAY_ID: 'remote-play-id',

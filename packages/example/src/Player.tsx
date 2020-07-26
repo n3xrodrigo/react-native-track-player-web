@@ -1,14 +1,16 @@
 import React, { useState } from 'react';
-import PropTypes from 'prop-types';
 import TrackPlayer, {
-  useTrackPlayerProgress,
+  State,
+  Event,
+  useProgress,
   usePlaybackState,
   useTrackPlayerEvents,
-} from 'react-native-track-player';
-import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+  Track,
+} from 'react-native-track-player-web';
+import { Image, StyleSheet, Text, TouchableOpacity, View, ViewStyle } from 'react-native';
 
 function ProgressBar() {
-  const progress = useTrackPlayerProgress();
+  const progress = useProgress();
 
   return (
     <View style={styles.progress}>
@@ -23,7 +25,7 @@ function ProgressBar() {
   );
 }
 
-function ControlButton({ title, onPress }) {
+function ControlButton({ title, onPress }: { title: string; onPress(): void }) {
   return (
     <TouchableOpacity style={styles.controlButtonContainer} onPress={onPress}>
       <Text style={styles.controlButtonText}>{title}</Text>
@@ -31,24 +33,27 @@ function ControlButton({ title, onPress }) {
   );
 }
 
-ControlButton.propTypes = {
-  title: PropTypes.string.isRequired,
-  onPress: PropTypes.func.isRequired,
-};
+interface Props {
+  style: ViewStyle;
+  onNext(): void;
+  onPrevious(): void;
+  onTogglePlayback(): void;
+}
 
-export default function Player(props) {
+export default function Player(props: Props) {
   const playbackState = usePlaybackState();
-  const [trackTitle, setTrackTitle] = useState('');
-  const [trackArtwork, setTrackArtwork] = useState();
-  const [trackArtist, setTrackArtist] = useState('');
 
-  useTrackPlayerEvents(['playback-track-changed'], async (event) => {
-    if (event.type === TrackPlayer.TrackPlayerEvents.PLAYBACK_TRACK_CHANGED) {
-      const track = await TrackPlayer.getTrack(event.nextTrack);
-      const { title, artist, artwork } = track || {};
-      setTrackTitle(title);
-      setTrackArtist(artist);
-      setTrackArtwork(artwork);
+  const [trackTitle, setTrackTitle] = useState<undefined | string>('');
+  const [trackArtwork, setTrackArtwork] = useState<any>('');
+  const [trackArtist, setTrackArtist] = useState<undefined | string>('');
+
+  useTrackPlayerEvents([Event.PlaybackTrackChanged], (event: any) => {
+    if (event.type === Event.PlaybackTrackChanged) {
+      TrackPlayer.getTrack(event.nextTrack).then((track: Track) => {
+        setTrackTitle(track.title);
+        setTrackArtist(track.artist);
+        setTrackArtwork(track.artwork);
+      });
     }
   });
 
@@ -56,10 +61,7 @@ export default function Player(props) {
 
   var middleButtonText = 'Play';
 
-  if (
-    playbackState === TrackPlayer.STATE_PLAYING ||
-    playbackState === TrackPlayer.STATE_BUFFERING
-  ) {
+  if (playbackState === State.Playing || playbackState === State.Buffering) {
     middleButtonText = 'Pause';
   }
 
@@ -115,7 +117,7 @@ const styles = StyleSheet.create({
   controls: {
     marginVertical: 20,
     flexDirection: 'row',
-    width: '90%',
+    width: '100%',
   },
   controlButtonContainer: {
     flexGrow: 1,

@@ -1,7 +1,6 @@
 import React, { useEffect } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import TrackPlayer, { usePlaybackState } from 'react-native-track-player';
-
+import TrackPlayer, { Capability, State, usePlaybackState } from 'react-native-track-player-web';
 import Player from './Player';
 import playlistData from './playlist.json';
 import localTrack from './pure.m4a';
@@ -10,40 +9,36 @@ export default function PlaylistScreen() {
   const playbackState = usePlaybackState();
 
   useEffect(() => {
-    setup();
-  }, []);
-
-  async function setup() {
-    await TrackPlayer.setupPlayer({});
-    await TrackPlayer.updateOptions({
+    TrackPlayer.setupPlayer();
+    TrackPlayer.updateOptions({
       stopWithApp: true,
       capabilities: [
-        TrackPlayer.CAPABILITY_PLAY,
-        TrackPlayer.CAPABILITY_PAUSE,
-        TrackPlayer.CAPABILITY_SKIP_TO_NEXT,
-        TrackPlayer.CAPABILITY_SKIP_TO_PREVIOUS,
-        TrackPlayer.CAPABILITY_STOP,
+        Capability.Play,
+        Capability.Pause,
+        Capability.SkipToNext,
+        Capability.SkipToPrevious,
+        Capability.Stop,
       ],
-      compactCapabilities: [TrackPlayer.CAPABILITY_PLAY, TrackPlayer.CAPABILITY_PAUSE],
+      compactCapabilities: [Capability.Play, Capability.Pause],
     });
-  }
+  }, []);
 
   async function togglePlayback() {
     const currentTrack = await TrackPlayer.getCurrentTrack();
     if (currentTrack == null) {
       await TrackPlayer.reset();
+      await TrackPlayer.add(playlistData);
       await TrackPlayer.add({
         id: 'local-track',
         url: localTrack,
         title: 'Pure (Demo)',
         artist: 'David Chavez',
-        artwork: 'https://picsum.photos/id/500/200/200.jpg',
+        artwork: 'https://picsum.photos/200',
         duration: 28,
       });
-      await TrackPlayer.add(playlistData);
       await TrackPlayer.play();
     } else {
-      if (playbackState === TrackPlayer.STATE_PAUSED) {
+      if (playbackState === State.Paused) {
         await TrackPlayer.play();
       } else {
         await TrackPlayer.pause();
@@ -72,20 +67,18 @@ PlaylistScreen.navigationOptions = {
   title: 'Playlist Example',
 };
 
-function getStateName(state) {
+function getStateName(state: State) {
   switch (state) {
-    case TrackPlayer.STATE_NONE:
+    case State.None:
       return 'None';
-    case TrackPlayer.STATE_PLAYING:
+    case State.Playing:
       return 'Playing';
-    case TrackPlayer.STATE_PAUSED:
+    case State.Paused:
       return 'Paused';
-    case TrackPlayer.STATE_STOPPED:
+    case State.Stopped:
       return 'Stopped';
-    case TrackPlayer.STATE_BUFFERING:
+    case State.Buffering:
       return 'Buffering';
-    default:
-      return 'Unknown';
   }
 }
 
@@ -103,10 +96,10 @@ async function skipToPrevious() {
 
 const styles = StyleSheet.create({
   container: {
-    minHeight: '100vh',
-    flexGrow: 1,
+    flex: 1,
     alignItems: 'center',
     backgroundColor: '#F5FCFF',
+    minHeight: '100vh',
   },
   description: {
     width: '80%',

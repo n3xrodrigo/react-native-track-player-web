@@ -8,6 +8,7 @@
     "packages/*"
   ],
   "scripts": {
-    "lerna": "lerna"
+    "lerna": "lerna",
+    "start": "lerna run start"
   }
 }
