@@ -4,6 +4,14 @@
 
 Note that this is a partial implementation and it's not production ready.
 
+### Usage
+
+This only works with `react-native-track-player` v2, so until the official release:
+
+```sh
+yarn add react-native-track-player@next react-native-track-player-web
+```
+
 ### Targeting the Web
 
 Add the following to your webpack configuration:
