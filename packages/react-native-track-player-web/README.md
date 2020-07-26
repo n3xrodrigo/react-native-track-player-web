@@ -1,11 +1,21 @@
-# `react-native-track-player-web`
+# react-native-track-player-web
 
-> TODO: description
+`react-native-web` partial implementation of [react-native-track-player](https://github.com/react-native-kit/react-native-track-player).
 
-## Usage
+Note that this is a partial implementation and it's not production ready.
 
-```
-const reactNativeTrackPlayerWeb = require('react-native-track-player-web');
+### Targeting the Web
 
-// TODO: DEMONSTRATE API
+Add the following to your webpack configuration:
+
+```javascript
+module.exports = {
+  ..., /* the existing configuration */
+
+  resolve: {
+    alias: {
+      'react-native-track-player': 'react-native-track-player-web'
+    }
+  }
+};
 ```
